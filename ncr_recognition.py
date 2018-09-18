@@ -46,6 +46,7 @@ while True:
     _, img = cap.read()
     image_char = img.astype(np.uint8).tostring()
     features = facerecg.get_feature(img.shape[0], img.shape[1], image_char)
-    rets = {'id': args.camid, 'features' : features, 'time' : time.time()}
-    #print(json.dumps(rets))
-    send_features(rets)
+    if(len(features) != 0):
+        rets = {'id': args.camid, 'features' : features, 'time' : time.time()}
+        #print(json.dumps(rets))
+        send_features(rets)
