@@ -3,8 +3,11 @@ import json
 import facerecognition
 import cv2
 import numpy as np
-import time
+import time,os
 import argparse
+
+os.putenv("CAP_PROP_FRAME_WIDTH", "320")
+os.putenv("CAP_PROP_FRAME_HEIGHT", "240")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dev', type=str, required=True,
@@ -13,6 +16,8 @@ parser.add_argument('--gwip', type=str, default="10.193.20.1",
                     help='The port for http server')
 parser.add_argument('--gwport', type=str, default="4040",
                     help='The ip for training server')
+parser.add_argument('--camid', type=int, required=True,
+                    help='Camera id')
 args = parser.parse_args()
 
 if 'usb' in args.dev:
@@ -41,6 +46,6 @@ while True:
     _, img = cap.read()
     image_char = img.astype(np.uint8).tostring()
     features = facerecg.get_feature(img.shape[0], img.shape[1], image_char)
-    rets = {'id': 0, 'features' : features, 'time' : time.time()}
+    rets = {'id': args.camid, 'features' : features, 'time' : time.time()}
     #print(json.dumps(rets))
     send_features(rets)
