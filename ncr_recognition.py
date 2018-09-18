@@ -24,7 +24,7 @@ if 'usb' in args.dev:
     print("Using onboard usb camera")
     cap = cv2.VideoCapture(int(args.dev[3]))
 else:
-    print("Using ip camera with url(s)", video_source)
+    print("Using ip camera with url(s)", args.dev)
     cap = cv2.VideoCapture(args.dev)
 print("Using gw ip:" + args.gwip + " port:" + args.gwport)
 

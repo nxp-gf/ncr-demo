@@ -23,7 +23,7 @@ NULL_TIME       = ""
 IDENTIFY_DB_FILE = "./models/identify.csv"
 RECORD_DB_FILE = "./models/record.csv"
 
-enter_camera_list = [0]
+enter_camera_list = [1]
 exit_camera_list = [2]
 shelf_camera_list = [3,4]
 
