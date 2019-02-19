@@ -57,14 +57,14 @@ def find_feature(feature, feature_list):
     largest = 0
     for value in feature_list:
         similar = cal_similar(value, feature)
-        print similar
+        #print similar
         if (similar > largest):
             largest = similar
 
     if (largest > FACE_RECOGNITION_THRES):
-        return True;
+        return True
     else:
-        return 0
+        return False
 
 #load identify lib;
 def load_identfiy():
@@ -85,7 +85,7 @@ def get_identify(feature):
     largest = 0
     for key in identify_dict.keys():
         similar = cal_similar(key, feature)
-        print similar
+        #print similar
         if (similar > largest):
             largest = similar
             identify = identify_dict[key]
@@ -200,7 +200,7 @@ class GetFeature(Resource):
                 if (similar > largest):
                     largest = similar
                     db_copy = db
-            if (largest > FACE_RECOGNITION_THRES):
+            if (largest > FACE_RECOGNITION_THRES and db_copy['camera_id'] == payload[u'id']):
                 print("Found the same people")
                 db_copy['count'] += 1
                 db_copy['time'] = payload[u'time']
