@@ -21,7 +21,7 @@ IDENTIFY_END    = 9999999999
 IDENTIFY_DB_FILE = "./models/identify.csv"
 RECORD_DB_FILE = "./models/record.csv"
 
-enter_camera_list = [1]
+enter_camera_list = [0]
 exit_camera_list = [2]
 shelf_camera_list = [3,4,5]
 
@@ -36,8 +36,8 @@ shelf_ft_dict = {}
 
 #calulate the similar feature
 def cal_similar(v1, v2):
-    print v1, v2
-    if (len(v1) != len(f1)):
+    #print v1, v2
+    if (len(v1) != len(v2)):
         return False
     ret = 0.0
     mod1 = 0.0
@@ -61,7 +61,7 @@ def find_feature(feature, feature_list):
         if (similar > largest):
             largest = similar
 
-    if (largest > THRESHOLD):
+    if (largest > FACE_RECOGNITION_THRES):
         return True;
     else:
         return 0
@@ -90,7 +90,7 @@ def get_identify(feature):
             largest = similar
             identify = identify_dict[key]
 
-    if (largest > THRESHOLD):
+    if (largest > FACE_RECOGNITION_THRES):
         return identify;
     else:
         return 0
@@ -131,6 +131,7 @@ def handle_feature(feature, camera_id, time):
 
             #record the entry to data base
             record_msg(identify, camera_id, time, 0);
+            print(identify, "enter.")
             ret = True
     #exit camera;
     elif camera_id in exit_camera_list:
@@ -140,6 +141,7 @@ def handle_feature(feature, camera_id, time):
             main_ft_list.remove(feature)
             record_msg(get_identify(feature), camera_id, 0, time);
             ret = True
+            print(identify, "exit.")
     #counter camera;
     elif camera_id in shelf_camera_list:
         #If not in list, enter! add it in list, record entry;
@@ -194,19 +196,19 @@ class GetFeature(Resource):
         for newfeature in payload[u'features']:
             largest = 0
             for db in tmp_ft_list:
-                similar = cal_similar(value, db['feature'])
+                similar = cal_similar(newfeature, db['feature'])
                 if (similar > largest):
                     largest = similar
                     db_copy = db
-            if (largest > THRESHOLD):
+            if (largest > FACE_RECOGNITION_THRES):
                 print("Found the same people")
                 db_copy['count'] += 1
                 db_copy['time'] = payload[u'time']
             else:
                 #Add new feature
                 print("Found new people")
-                newdb = {'count':1, 'feature':tuple(newfeature), 'time':payload[u'time'], 'camera_id':payload[u'camera_id']}
-                tmp_ft_list.append(db)
+                newdb = {'count':1, 'feature':tuple(newfeature), 'time':payload[u'time'], 'camera_id':payload[u'id']}
+                tmp_ft_list.append(newdb)
 
         return {'state':'SUCCESS'}, 200
 
