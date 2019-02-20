@@ -11,13 +11,14 @@ parser.add_argument('id', type=str, location='args')
 parser.add_argument('end', type=str, location='args')
 
 
-TIME_THRES = 2
+TIME_THRES = 1
 CNTS_THRES = 3
 STATUS_ENTER = 1
 STATUS_EXIT = 0
 FACE_RECOGNITION_THRES = 0.71
 IDENTIFY_START  = 1000000000
 IDENTIFY_END    = 9999999999
+NULL_TIME       = ""
 
 IDENTIFY_DB_FILE = "./models/identify.csv"
 RECORD_DB_FILE = "./models/record.csv"
@@ -93,7 +94,7 @@ def create_identify(feature):
 def record_msg(camera_id, identify, time1, time2):
     with open(RECORD_DB_FILE, 'a') as fp:
         mywriter = csv.writer(fp)
-        mywriter.writerow(camera_id, str(identify), time1, time2)
+        mywriter.writerow((camera_id, str(identify), time1, time2))
 
 def db_update_thread():
     while(True):
@@ -101,6 +102,7 @@ def db_update_thread():
 
         #loop the tmp_ft_list
         for db in tmp_ft_list:
+            cur = time.time()
             #fault alert
             if ((cur - db['time']) > TIME_THRES and db['count'] < CNTS_THRES):
                 print("Delete fault alert")
@@ -108,12 +110,11 @@ def db_update_thread():
                 continue
 
             camera_id = db['camera_id']
-            identify = get_identify(feature)
+            identify = get_identify(db['feature'])
             if (0 == identify):
-                identify = create_identify(feature)
+                identify = create_identify(db['feature'])
 
-            cur = time.time()
-            tm = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time))
+            tm = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(db['time']))
             #exit 2s in camera
             if((cur - db['time'] > TIME_THRES) and (db['count'] > CNTS_THRES)):
                 if camera_id in enter_camera_list:
@@ -127,13 +128,13 @@ def db_update_thread():
                     tmp_ft_list.remove(db)
                 #shelf camera;
                 elif camera_id in shelf_camera_list:
-                    print(identify, camera_id, "exit.")
+                    print(identify, "shelf",camera_id, "exit.")
                     record_msg(camera_id, identify, NULL_TIME, tm)
                     tmp_ft_list.remove(db)
             #stay in camera, if it is shelf camera, enter
-            elif((cur - time < TIME_THRES) and (db['count'] > CNTS_THRES)):
+            elif((cur - db['time'] < TIME_THRES) and (db['count'] > CNTS_THRES)):
                 if (camera_id in shelf_camera_list) and  db['status'] != STATUS_ENTER:
-                    print(identify, camera_id, "enter.")
+                    print(identify, "shelf", camera_id, "enter.")
                     record_msg(camera_id, identify, tm, NULL_TIME)
                     db['status'] = STATUS_ENTER
 
@@ -162,12 +163,14 @@ class GetFeature(Resource):
             if (largest > FACE_RECOGNITION_THRES and db_copy['camera_id'] == payload[u'id']):
                 print("Found the same people")
                 db_copy['count'] += 1
-                db_copy['time'] = payload[u'time']
+                db_copy['time'] = time.time()
+                #db_copy['time'] = payload[u'time']
             else:
                 #Add new feature
                 print("Found new people")
                 #if feature is not in feature_dict, give it an identify and add it
-                newdb = {'count':1, 'feature':tuple(newfeature), 'time':payload[u'time'], 'camera_id':payload[u'id'], 'status':STATUS_EXIT}
+                newdb = {'count':1, 'feature':tuple(newfeature), 'time':time.time(), 'camera_id':payload[u'id'], 'status':STATUS_EXIT}
+                #newdb = {'count':1, 'feature':tuple(newfeature), 'time':payload[u'time'], 'camera_id':payload[u'id'], 'status':STATUS_EXIT}
                 tmp_ft_list.append(newdb)
 
         return {'state':'SUCCESS'}, 200
