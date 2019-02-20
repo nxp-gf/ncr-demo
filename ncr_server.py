@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from flask import Flask, send_from_directory
 from flask_restful import reqparse, abort, Api, Resource, request
-import json, math, threading, time, random, csv
+import json, math, threading, time, random, csv, sqlite3
 
 parser = reqparse.RequestParser()
 
@@ -91,10 +91,28 @@ def create_identify(feature):
 
     return identify;
 
-def record_msg(camera_id, identify, time1, time2):
-    with open(RECORD_DB_FILE, 'a') as fp:
-        mywriter = csv.writer(fp)
-        mywriter.writerow((camera_id, str(identify), time1, time2))
+def create_store_db():
+    conn = sqlite3.connect('store.db')
+    conn.text_factory = str
+    c = conn.cursor()
+
+    #create the table
+    c.execute('''CREATE TABLE IF NOT EXISTS STORE \
+                (ID INTEGER PRIMARY KEY AUTOINCREMENT, \
+                CameraID INT NOT NULL, PersonName TEXT NOT NULL, \
+                TimePersonIn datetime, TimePersonOut datetime);''')
+    conn.commit()
+    conn.close()
+
+def record_msg(CameraID, personName, TimePersonIn, TimePersonOut):
+    db = sqlite3.connect('store.db')
+    db.row_factory = sqlite3.Row
+    c = db.cursor()
+    record_data = [(CameraID, personName, TimePersonIn, TimePersonOut),]
+    c.executemany('INSERT INTO STORE(CameraID, PersonName, TimePersonIn,\
+                            TimePersonOut) VALUES (?,?,?,?)', record_data)
+    db.commit()
+    db.close()
 
 def db_update_thread():
     while(True):
@@ -133,7 +151,8 @@ def db_update_thread():
                     tmp_ft_list.remove(db)
             #stay in camera, if it is shelf camera, enter
             elif((cur - db['time'] < TIME_THRES) and (db['count'] > CNTS_THRES)):
-                if (camera_id in shelf_camera_list) and  db['status'] != STATUS_ENTER:
+                if ((camera_id in shelf_camera_list) \
+                        and  (db['status'] != STATUS_ENTER)):
                     print(identify, "shelf", camera_id, "enter.")
                     record_msg(camera_id, identify, tm, NULL_TIME)
                     db['status'] = STATUS_ENTER
@@ -160,7 +179,8 @@ class GetFeature(Resource):
                 if (similar > largest):
                     largest = similar
                     db_copy = db
-            if (largest > FACE_RECOGNITION_THRES and db_copy['camera_id'] == payload[u'id']):
+            if ((largest > FACE_RECOGNITION_THRES) \
+                    and (db_copy['camera_id'] == payload[u'id'])):
                 print("Found the same people")
                 db_copy['count'] += 1
                 db_copy['time'] = time.time()
@@ -168,9 +188,9 @@ class GetFeature(Resource):
             else:
                 #Add new feature
                 print("Found new people")
-                #if feature is not in feature_dict, give it an identify and add it
-                newdb = {'count':1, 'feature':tuple(newfeature), 'time':time.time(), 'camera_id':payload[u'id'], 'status':STATUS_EXIT}
-                #newdb = {'count':1, 'feature':tuple(newfeature), 'time':payload[u'time'], 'camera_id':payload[u'id'], 'status':STATUS_EXIT}
+                newdb = {'count':1, 'feature':tuple(newfeature), \
+                            'time':time.time(), 'camera_id':payload[u'id'], \
+                            'status':STATUS_EXIT}
                 tmp_ft_list.append(newdb)
 
         return {'state':'SUCCESS'}, 200
@@ -182,6 +202,8 @@ api.add_resource(GetFeature, '/feature')
 
 if __name__ == '__main__':
     #Init identify_dict according to the identify lib;
-    load_identfiy();
+    load_identfiy()
+
+    create_store_db()
 
     app.run(host='0.0.0.0', port=4040, threaded=True)
