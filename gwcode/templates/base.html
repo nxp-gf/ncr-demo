@@ -1,0 +1,60 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}pyecharts - {{ title }}{% endblock %}
+
+{% block head %}
+    {{super()}}
+    <link rel="icon" href="{{ url_for('static', filename='images/fav.ico')}}" type="image/x-coin">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css')}}" type="text/css">
+    <title>Proudly presented by ECharts</title>
+	{% for jsfile_name in script_list %}
+        <script src="static/echarts/{{ jsfile_name }}.js"></script>
+    {% endfor %}
+{% endblock %}
+
+{% block navbar %}
+    <div class="navbar navbar-inverse" role="navigation">
+        <div class="container">
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">统计店内
+                            <ul class="dropdown-menu">
+                                <li><a href="{{ url_for('store_line') }}">当前人数</a> </li>
+                                <li><a href="{{ url_for('store_bar') }}">历史人数</a> </li>
+                            </ul>
+                        </a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">统计货架
+                                <ul class="dropdown-menu">
+                                     <li><a href="{{ url_for('shelves_line') }}">当前人数</a> </li>
+                                     <li><a href="{{ url_for('shelves_bar') }}">历史人数</a> </li>
+                                </ul>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+<!--
+    <div class="reqest-date">
+            <form id="select" method="POST" action='#'>
+                <input type="date" name="_date" id="_date" value="2019-02-18">
+                <input type="submit" value="submit">
+            </form>
+    </div> 
+-->
+    <div class="my-charts">
+        {{ myechart|safe }}
+    </div>
+    <footer class="container-fluid foot-wrap">
+        <p align="center" style="margin-top: 20px;color:#878B91;">
+            Copyright &copy; 2019 NXP
+        </p>
+    </footer>
+{% endblock %}
