@@ -20,8 +20,8 @@ IDENTIFY_START  = 1000000000
 IDENTIFY_END    = 9999999999
 NULL_TIME       = ""
 
-IDENTIFY_DB_FILE = "./models/identify.csv"
-RECORD_DB_FILE = "./models/record.csv"
+IDENTIFY_DB_FILE = "./record/identify.csv"
+RECORD_DB_FILE = "./record/record.csv"
 
 enter_camera_list = [1]
 exit_camera_list = [2]
