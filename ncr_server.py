@@ -31,6 +31,8 @@ shelf_camera_list = [3,4]
 identify_dict = {}
 #To store the feature received for next step;
 tmp_ft_list = []
+#To store the identify in the shop;
+main_ft_list = []
 
 #calulate the similar feature
 def cal_similar(v1, v2):
@@ -135,15 +137,19 @@ def db_update_thread():
             tm = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(db['time']))
             #exit 2s in camera
             if((cur - db['time'] > TIME_THRES) and (db['count'] > CNTS_THRES)):
-                if camera_id in enter_camera_list:
+                if ((camera_id in enter_camera_list)
+                        and (identify not in main_ft_list)):
                     print(identify, camera_id, "enter.")
                     record_msg(camera_id, identify, tm, NULL_TIME)
                     tmp_ft_list.remove(db)
+                    main_ft_list.append(db)
                 #exit camera;
-                elif camera_id in exit_camera_list:
+                elif ((camera_id in exit_camera_list)
+                        and (identify in main_ft_list)):
                     print(identify, camera_id, "exit.")
                     record_msg(camera_id, identify, NULL_TIME, tm)
                     tmp_ft_list.remove(db)
+                    main_ft_list.remove(db)
                 #shelf camera;
                 elif camera_id in shelf_camera_list:
                     print(identify, "shelf",camera_id, "exit.")
