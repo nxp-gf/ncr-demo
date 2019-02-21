@@ -16,6 +16,12 @@ def get_day_time(time_from_user, modifier):
     start_day = person_in[0][0]
     return start_day
 
+def get_person_new_in(next_time, this_time):
+    new_in = next_time - this_time
+    if new_in < 0:
+        new_in = 0
+    return new_in
+
 def query_overall_person_count(time_from_user):
     db = get_db()
     startTime = get_day_time(time_from_user, 'start of day')
@@ -56,13 +62,13 @@ def query_overall_person_multicount(time_from_user):
 # Metrics here temporary defined to be hours
 def query_overall_history_hour_person_count(start_time, length):
     time_next = get_day_time(start_time, '+' + str(1) + ' hour')
-    start_count = query_overall_person_count(start_time) + (query_overall_person_in_count(time_next) - query_overall_person_in_count(start_time))
+    start_count = query_overall_person_count(start_time) + get_person_new_in(query_overall_person_in_count(time_next), query_overall_person_in_count(start_time))
     person_count = []
     person_count.append(start_count)
     for i in range(1, length):
         user_time = get_day_time(start_time, '+' + str(i) + ' hour')
         time_next = get_day_time(user_time, '+' + str(1) + ' hour')
-        count = query_overall_person_count(user_time) + (query_overall_person_in_count(time_next) - query_overall_person_in_count(user_time))
+        count = query_overall_person_count(user_time) + get_person_new_in(query_overall_person_in_count(time_next), query_overall_person_in_count(user_time))
         person_count.append(count)
     return person_count
 
@@ -102,13 +108,13 @@ def query_shelf_person_in_count(shelfid, time_from_user):
 
 def query_shelf_history_hour_person_count(shelfid, start_time, length):
     time_next = get_day_time(start_time, '+' + str(1) + ' hour')
-    start_count = query_shelf_person_count(shelfid, start_time) + (query_shelf_person_in_count(shelfid, time_next) - query_shelf_person_in_count(shelfid, start_time))
+    start_count = query_shelf_person_count(shelfid, start_time) + get_person_new_in(query_shelf_person_in_count(shelfid, time_next), query_shelf_person_in_count(shelfid, start_time))
     person_count = []
     person_count.append(start_count)
     for i in range(1, length):
         user_time = get_day_time(start_time, '+' + str(i) + ' hour')
         time_next = get_day_time(user_time, '+' + str(1) + ' hour')
-        count = query_shelf_person_count(shelfid, user_time) + (query_shelf_person_in_count(shelfid, time_next) - query_shelf_person_in_count(shelfid, user_time))
+        count = query_shelf_person_count(shelfid, user_time) + get_person_new_in(query_shelf_person_in_count(shelfid, time_next), query_shelf_person_in_count(shelfid, user_time))
         person_count.append(count)
     return person_count
 
