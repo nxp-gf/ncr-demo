@@ -94,7 +94,7 @@ def create_identify(feature):
     return identify;
 
 def create_store_db():
-    conn = sqlite3.connect('store.db')
+    conn = sqlite3.connect('gwcode/store.db')
     conn.text_factory = str
     c = conn.cursor()
 
@@ -107,7 +107,7 @@ def create_store_db():
     conn.close()
 
 def record_msg(CameraID, personName, TimePersonIn, TimePersonOut):
-    db = sqlite3.connect('store.db')
+    db = sqlite3.connect('gwcode/store.db')
     db.row_factory = sqlite3.Row
     c = db.cursor()
     record_data = [(CameraID, personName, TimePersonIn, TimePersonOut),]
@@ -115,6 +115,11 @@ def record_msg(CameraID, personName, TimePersonIn, TimePersonOut):
                             TimePersonOut) VALUES (?,?,?,?)', record_data)
     db.commit()
     db.close()
+
+    with open(RECORD_DB_FILE, 'a') as fp:
+        mywriter = csv.writer(fp)
+        mywriter.writerow((CameraID, personName, TimePersonIn, TimePersonOut))
+
 
 def db_update_thread():
     while(True):
