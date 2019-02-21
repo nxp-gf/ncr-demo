@@ -126,7 +126,7 @@ def draw_shelves_line(dt, array):
     j = 1
     line = Line(dt.date())
     for i in array:
-        name = "货架" + str(j)
+        name = "Shelf-" + str(j)
         j = j + 1
         line.add(name, attr, i, is_smooth=True, mark_point=["max", "min"])
 
