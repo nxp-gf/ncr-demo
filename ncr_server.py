@@ -147,14 +147,14 @@ def db_update_thread():
                     print(identify, camera_id, "enter.")
                     record_msg(camera_id, identify, tm, NULL_TIME)
                     tmp_ft_list.remove(db)
-                    main_ft_list.append(db)
+                    main_ft_list.append(identify)
                 #exit camera;
                 elif ((camera_id in exit_camera_list)
                         and (identify in main_ft_list)):
                     print(identify, camera_id, "exit.")
                     record_msg(camera_id, identify, NULL_TIME, tm)
                     tmp_ft_list.remove(db)
-                    main_ft_list.remove(db)
+                    main_ft_list.remove(identify)
                 #shelf camera;
                 elif camera_id in shelf_camera_list:
                     print(identify, "shelf",camera_id, "exit.")

@@ -22,7 +22,7 @@ def query_overall_person_count(time_from_user):
     person_in_cursor = db.execute("SELECT * FROM STORE WHERE CameraID=(?) AND TimePersonIn between (?) and (?)", (1, startTime, time_from_user))
     person_in = person_in_cursor.fetchall()
     person_in_count = len(person_in)
-    person_out_cursor = db.execute("SELECT * FROM STORE WHERE CameraID=(?) AND TimePersonOut between (?) and (?)", (4, startTime, time_from_user))
+    person_out_cursor = db.execute("SELECT * FROM STORE WHERE CameraID=(?) AND TimePersonOut between (?) and (?)", (2, startTime, time_from_user))
     person_out = person_out_cursor.fetchall()
     person_out_count = len(person_out)
     db.commit()
