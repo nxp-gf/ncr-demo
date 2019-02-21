@@ -102,7 +102,7 @@ def draw_store_line(dt, v):
         attr.append(dtf)
 
     line = Line(dt.date())
-    line.add("商店A", attr, v, is_smooth=True, mark_point=["max", "min"])
+    line.add("Store-1", attr, v, is_smooth=True, mark_point=["max", "min"])
     return line
 
 def draw_store_bar(dt, v):
@@ -112,7 +112,7 @@ def draw_store_bar(dt, v):
         attr.append(t)
 
     bar = Bar(dt.date())
-    bar.add("商店A", attr, v, mark_line=["average"], mark_point=["max", "min"])
+    bar.add("Store-1", attr, v, mark_line=["average"], mark_point=["max", "min"])
     return bar
 
 
@@ -141,7 +141,7 @@ def draw_shelves_bar(dt, array):
     j = 1
     bar = Bar(dt.date())
     for i in array:
-        name = "货架" + str(j)
+        name = "Shelf-" + str(j)
         j = j + 1
         bar.add(name, attr, i, mark_line=["average"], mark_point=["max", "min"])
 
